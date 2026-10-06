@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Add student')
+@section('title', 'Create Student')
 
 @section('content')
-    <h1>Add student</h1>
+    <h1>Create Student</h1>
     <p><a href="{{ route('students.index') }}">Back to students</a></p>
     <p>Fields marked * are required.</p>
 
     <form method="POST" action="{{ route('students.store') }}">
         @csrf
-        @include('students._form', ['student' => $student, 'submitLabel' => 'Create student'])
+        @include('student._form', ['student' => $student, 'submitLabel' => 'Create Student'])
     </form>
 @endsection

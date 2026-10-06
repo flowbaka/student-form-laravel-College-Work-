@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Student;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 
 uses(LazilyRefreshDatabase::class);
@@ -18,32 +20,31 @@ function studentPayload(array $overrides = []): array
 }
 
 test('students list shows an empty state', function () {
-    $this->get(route('students.index'))->assertSee('No students yet');
+    $this->get(route('students.index'))->assertSee('No students found.');
 });
 
-test('students list paginates newest records first', function () {
-    $students = Student::factory()->count(11)->create(['created_at' => '2026-01-01 10:00:00']);
+test('students list displays all saved students', function () {
+    $students = Student::factory()->count(11)->create();
 
     $this->get(route('students.index'))
+        ->assertSee($students->first()->email)
         ->assertSee($students->last()->email)
-        ->assertDontSee($students->first()->email)
-        ->assertViewHas('students', fn ($page): bool => $page->total() === 11 && $page->count() === 10);
-
-    $this->get(route('students.index', ['page' => 2]))->assertSee($students->first()->email);
+        ->assertViewIs('student.list')
+        ->assertViewHas('students', fn (Collection $records): bool => $records->count() === 11);
 });
 
 test('student creation form submits to the store route with csrf protection', function () {
     $this->get(route('students.create'))
         ->assertSee('action="'.route('students.store').'"', false)
         ->assertSee('name="_token"', false)
-        ->assertSee('Create student');
+        ->assertSee('Create Student');
 });
 
 test('valid student data is saved with a date cast and timestamps', function () {
     $response = $this->post(route('students.store'), studentPayload(['email' => 'ASHA@example.com', 'id' => 999]));
 
     $student = Student::query()->sole();
-    $response->assertRedirectToRoute('students.show', $student)->assertSessionHas('success');
+    $response->assertRedirectToRoute('students.index')->assertSessionHas('success');
     $this->assertDatabaseHas('students', ['name' => 'Asha Sharma', 'email' => 'asha@example.com', 'phone' => '+977 9800000000']);
     expect($student->id)->not->toBe(999);
     expect($student->date_of_birth->format('Y-m-d'))->toBe('2000-04-12');
@@ -82,12 +83,12 @@ test('invalid student fields are rejected without saving', function (string $fie
     'email format' => ['email', 'invalid', 'The email field must be a valid email address.'],
     'email length' => ['email', str_repeat('a', 245).'@example.com', 'The email field must not be greater than 255 characters.'],
     'phone must be text' => ['phone', ['invalid'], 'The phone field must be a string.'],
-    'phone length' => ['phone', str_repeat('1', 31), 'The phone field must not be greater than 30 characters.'],
+    'phone length' => ['phone', str_repeat('1', 21), 'The phone field must not be greater than 20 characters.'],
     'address must be text' => ['address', ['invalid'], 'The address field must be a string.'],
-    'address length' => ['address', str_repeat('a', 2001), 'The address field must not be greater than 2000 characters.'],
-    'birthday format' => ['date_of_birth', '12/04/2000', 'The date of birth field must match the format Y-m-d.'],
-    'birthday must be real' => ['date_of_birth', '2000-02-30', 'The date of birth field must match the format Y-m-d.'],
-    'birthday cannot be future' => ['date_of_birth', '9999-01-01', 'The date of birth field must be a date before or equal to today.'],
+    'address length' => ['address', str_repeat('a', 501), 'The address field must not be greater than 500 characters.'],
+    'birthday format' => ['date_of_birth', 'not-a-date', 'The date of birth field must be a valid date.'],
+    'birthday must be real' => ['date_of_birth', '2000-02-30', 'The date of birth field must be a valid date.'],
+    'birthday must be scalar' => ['date_of_birth', ['invalid'], 'The date of birth field must be a valid date.'],
 ]);
 
 test('duplicate student emails are rejected regardless of case', function () {
@@ -194,4 +195,19 @@ test('student writes without a csrf token are refused', function () {
     $this->post(route('students.store'), studentPayload())->assertStatus(419);
 
     $this->assertDatabaseCount('students', 0);
+});
+
+test('student details display the age calculated from the birthday', function () {
+    $this->travelTo(Carbon::parse('2026-10-06'));
+    $student = Student::factory()->create(studentPayload());
+
+    $this->get(route('students.show', $student))
+        ->assertViewIs('student.detail')->assertSee('<dd>26</dd>', false);
+});
+
+test('student date validation accepts a valid date as specified in the workshop', function () {
+    $this->post(route('students.store'), studentPayload(['date_of_birth' => '2099-01-01']))
+        ->assertRedirectToRoute('students.index')->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('students', ['email' => 'asha@example.com', 'date_of_birth' => '2099-01-01']);
 });

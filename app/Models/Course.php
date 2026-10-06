@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use Database\Factories\CourseFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'description', 'duration', 'fee', 'difficulty', 'is_active'])]
 class Course extends Model
 {
     /** @use HasFactory<CourseFactory> */
     use HasFactory;
+
+    /** @var list<string> */
+    protected $fillable = ['name', 'description', 'duration', 'fee', 'difficulty', 'is_active'];
 
     public const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 

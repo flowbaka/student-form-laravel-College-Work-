@@ -2,12 +2,11 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
 class UpdateStudentRequest extends StoreStudentRequest
 {
-    /** @return array<string, array<ValidationRule|string>> */
+    /** @return array<string, array<mixed>|string> */
     public function rules(): array
     {
         return array_replace(parent::rules(), [

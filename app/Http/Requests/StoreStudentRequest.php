@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class StoreStudentRequest extends FormRequest
 {
@@ -21,15 +19,15 @@ class StoreStudentRequest extends FormRequest
         }
     }
 
-    /** @return array<string, array<ValidationRule|string>> */
+    /** @return array<string, string> */
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('students', 'email')],
-            'phone' => ['required', 'string', 'max:30'],
-            'address' => ['nullable', 'string', 'max:2000'],
-            'date_of_birth' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:students,email',
+            'phone' => 'required|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'date_of_birth' => 'nullable|date',
         ];
     }
 }

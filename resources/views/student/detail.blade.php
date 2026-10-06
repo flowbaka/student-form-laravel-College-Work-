@@ -7,6 +7,10 @@
     <p><a href="{{ route('students.index') }}">Back to students</a></p>
 
     <dl>
+        <dt>ID</dt>
+        <dd>{{ $student->id }}</dd>
+        <dt>Age</dt>
+        <dd>{{ $student->age ?? 'Not available' }}</dd>
         <dt>Email</dt>
         <dd>{{ $student->email }}</dd>
         <dt>Phone</dt>

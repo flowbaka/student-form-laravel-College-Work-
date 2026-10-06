@@ -12,44 +12,42 @@ class CourseController extends Controller
 {
     public function index(): View
     {
-        return view('courses.index', [
-            'courses' => Course::query()->orderByDesc('created_at')->orderByDesc('id')->paginate(10),
-        ]);
+        return view('course.list', ['courses' => Course::all()]);
     }
 
     public function create(): View
     {
-        return view('courses.create', ['course' => new Course]);
+        return view('course.create', ['course' => new Course]);
     }
 
     public function store(StoreCourseRequest $request): RedirectResponse
     {
         $course = Course::create($request->validated());
 
-        return redirect()->route('courses.show', $course)->with('success', 'Course created successfully.');
+        return redirect()->route('courses.index')->with('success', "Course {$course->name} created successfully!");
     }
 
     public function show(Course $course): View
     {
-        return view('courses.show', ['course' => $course]);
+        return view('course.detail', ['course' => $course]);
     }
 
     public function edit(Course $course): View
     {
-        return view('courses.edit', ['course' => $course]);
+        return view('course.edit', ['course' => $course]);
     }
 
     public function update(UpdateCourseRequest $request, Course $course): RedirectResponse
     {
         $course->update($request->validated());
 
-        return redirect()->route('courses.show', $course)->with('success', 'Course updated successfully.');
+        return redirect()->route('courses.show', $course)->with('success', 'Course updated successfully!');
     }
 
     public function destroy(Course $course): RedirectResponse
     {
         $course->delete();
 
-        return redirect()->route('courses.index')->with('success', 'Course deleted successfully.');
+        return redirect()->route('courses.index')->with('success', 'Course deleted successfully!');
     }
 }

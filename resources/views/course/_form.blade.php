@@ -1,11 +1,11 @@
-@include('partials.validation-errors')
+@include('partials.errors')
 
 <label for="name">Name *</label>
 <input id="name" name="name" type="text" value="{{ old('name', $course->name) }}" required maxlength="255">
 @error('name') <p class="error">{{ $message }}</p> @enderror
 
-<label for="description">Description *</label>
-<textarea id="description" name="description" rows="4" required maxlength="10000">{{ old('description', $course->description) }}</textarea>
+<label for="description">Description (optional)</label>
+<textarea id="description" name="description" rows="4" maxlength="10000">{{ old('description', $course->description) }}</textarea>
 @error('description') <p class="error">{{ $message }}</p> @enderror
 
 <label for="duration">Duration in weeks *</label>
