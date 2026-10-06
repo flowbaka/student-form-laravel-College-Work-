@@ -1,5 +1,5 @@
-<form method="POST" action="{{ $action }}" data-confirm="{{ $confirmation }}">
+<form method="POST" action="{{ $action }}" class="delete-form" data-confirm="{{ $confirmation }}">
     @csrf
     @method('DELETE')
-    <button type="submit" class="button-danger" aria-label="{{ $label }}">Delete</button>
+    <button type="submit" aria-label="{{ $label }}">Delete</button>
 </form>
